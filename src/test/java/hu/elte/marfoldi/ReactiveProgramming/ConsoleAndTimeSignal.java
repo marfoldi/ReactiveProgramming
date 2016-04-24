@@ -9,28 +9,30 @@ package hu.elte.marfoldi.ReactiveProgramming;
  *
  */
 public class ConsoleAndTimeSignal {
+	private static Signal<String> consoleSignal;
+	private static Signal<Integer> timeSignal;
+	private static Signal<String> joinedSignal;
+	
 	public static void main(String[] args) {
 	    createConsoleSignal();
-	    createTimeFromStartSignal();
+	    createTimeSignal();
+	    joinConsoleAndTimeSignal();
 	}
 	
 	private static void createConsoleSignal() {
-		Signal<String> consoleSignal = ConsoleSignal.getSignal();
-	    consoleSignal.addAction(new SignalAction<String>() {
-			@Override
-			public void signalChanged(String oldValue, String newValue) {
-				System.out.println(newValue);
-			}
-	    });
+		consoleSignal = ConsoleSignal.getSignal();
 	}
 	
-	private static void createTimeFromStartSignal() {
-		Signal<Integer> timeSignal = Time.every(1, Times.SECONDS);
-		Signal<Integer> timeFromStart = timeSignal.accumulate((elpashed, value) -> elpashed + 1, 0);
-		timeFromStart.addAction(new SignalAction<Integer>() {
+	private static void createTimeSignal() {
+		timeSignal = Time.every(1, Times.SECONDS).accumulate((elpashed, value) -> elpashed + 1, 0);
+	}
+	
+	private static void joinConsoleAndTimeSignal() {
+		joinedSignal = consoleSignal.join(timeSignal, (x,y) -> x + " (" + y);
+		joinedSignal.addAction(new SignalAction<String>() {
 			@Override
-			public void signalChanged(Integer oldValue, Integer newValue) {
-				System.out.println(newValue + " seconds");
+			public void signalChanged(String oldValue, String newValue) {
+				System.out.println(newValue + " seconds)");
 				}
 			});
 	}
